@@ -2,7 +2,9 @@
 Idea: Generate two points in an XY plane from -1 to 1 and check if they are within a unit circle. If not, they're in a square.
 Then, the ratio of points in the circle to total points approximates PI/4. To approximate PI, multiply the ratio by 4 to get PI = 4 * (points in circle / total points).
 '''
-import random  # for generating random points
+import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def estimate_pi(n):
@@ -22,8 +24,49 @@ def estimate_pi(n):
     PI = 4 * (inside_circle / total_points)
 
     print(f"Approximation of PI given {n} trials is {PI}")
+    return PI
 
 
-estimate_pi(1000)  # one thousand
-estimate_pi(100000)  # one hundred thousand
-estimate_pi(100000000)  # ten million
+# note, ai was used to help with the plotting code below. an explanation of the code and high level concepts will be documented in the pdf report
+n_values = [10**i for i in range(1, 6)]  # [10, 100, 1000, 10000, 100000]
+pi_estimates = []
+
+for n in n_values:
+    pi_est = estimate_pi(n)
+    pi_estimates.append(pi_est)
+
+plt.figure(figsize=(8, 6))
+plt.semilogx(n_values, pi_estimates, 'bo-')
+plt.axhline(y=3.14159, color='r', linestyle='--', label='True π')
+plt.xlabel('Number of samples (n)')
+plt.ylabel('π estimate')
+plt.title('Monte Carlo π Convergence')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+plt.savefig('pi_convergence.png', dpi=300, bbox_inches='tight')
+plt.close()
+
+n_values_for_hist = [10**3, 10**4, 10**5]  # 1000, 10000, 100000
+
+for n in n_values_for_hist:
+    estimates = []
+    print(f"\nRunning 500 trials for n={n}...")
+
+    for _ in range(500):
+        pi_est = estimate_pi(n)
+        estimates.append(pi_est)
+
+    plt.figure(figsize=(8, 6))
+    plt.xlim(3.0, 3.3)
+    plt.hist(estimates, bins=30, alpha=0.7, density=True)
+    plt.axvline(x=3.14159, color='r', linestyle='--', label='True π')
+    plt.xlabel('π estimate')
+    plt.ylabel('Density')
+    plt.title(f'Distribution of π estimates (n={n:,}, 500 trials)')
+    plt.legend()
+    plt.grid(True)
+
+    plt.savefig(f'pi_distribution_n{n}.png', dpi=300, bbox_inches='tight')
+    plt.close()
